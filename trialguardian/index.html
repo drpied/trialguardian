@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrialGuardian — Trouvez un essai clinique près de chez vous</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    :root {
+      --teal:       #0F6E56;
+      --teal2:      #085041;
+      --teal3:      #1D9E75;
+      --mint:       #E1F5EE;
+      --mint2:      #9FE1CB;
+      --cream:      #F7FAF9;
+      --text:       #111827;
+      --muted:      #6B7280;
+      --white:      #FFFFFF;
+      --radius:     14px;
+      --shadow:     0 4px 24px rgba(15,110,86,0.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); }
+
+    /* ── HEADER ── */
+    .header { background: var(--teal2); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.2); }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 7px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 11px; }
+    .top-bar-text { color: rgba(255,255,255,0.5); }
+    .lang-btn { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.7); border-radius: 20px; padding: 3px 12px; font-size: 11px; font-weight: 600; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; }
+    .lang-btn:hover { border-color: var(--mint2); color: var(--mint2); }
+    .header-main { display: flex; align-items: center; justify-content: center; padding: 14px 28px; gap: 12px; }
+    .logo-mark { width: 36px; height: 36px; background: var(--teal3); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .brand-name { font-family: 'DM Serif Display', serif; color: var(--white); font-size: 22px; }
+    .brand-tag { color: var(--mint2); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; }
+
+    /* ── HERO ── */
+    .hero { background: linear-gradient(160deg, #063d2e 0%, #0a5040 50%, #063d2e 100%); padding: 52px 28px 44px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 50%, rgba(29,158,117,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(159,225,203,0.06) 0%, transparent 60%); pointer-events: none; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(29,158,117,0.2); border: 1px solid rgba(159,225,203,0.3); border-radius: 30px; padding: 6px 18px; color: var(--mint2); font-size: 12px; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 24px; }
+    .hero-title { font-family: 'DM Serif Display', serif; color: var(--white); font-size: 34px; font-weight: 400; line-height: 1.2; margin-bottom: 12px; }
+    .hero-title em { color: var(--mint2); font-style: italic; }
+    .hero-sub { color: rgba(255,255,255,0.55); font-size: 14px; font-weight: 300; margin: 0 auto 32px; max-width: 360px; line-height: 1.7; }
+
+    /* ── SEARCH CARD ── */
+    .search-card { background: rgba(255,255,255,0.06); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px 20px; max-width: 520px; margin: 0 auto; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+    .search-input-wrap { position: relative; margin-bottom: 14px; }
+    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: 0.5; }
+    .search-input { width: 100%; padding: 14px 18px 14px 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: var(--white); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
+    .search-input:focus { border-color: var(--mint2); }
+    .search-input::placeholder { color: rgba(255,255,255,0.3); }
+    .filters-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .filter-label { color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 5px; display: block; }
+    .filter-select { width: 100%; padding: 10px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(8,80,65,0.8); color: var(--white); font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
+    .filter-select option { background: #063d2e; }
+    .search-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--teal3) 0%, var(--teal) 100%); color: var(--white); font-weight: 600; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 16px rgba(15,110,86,0.4); letter-spacing: 0.3px; }
+    .search-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(15,110,86,0.5); }
+    .search-btn:disabled { opacity: 0.6; transform: none; cursor: default; }
+
+    /* ── CONDITIONS PILLS ── */
+    .conditions-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+    .cond-pill { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s; }
+    .cond-pill:hover { background: rgba(29,158,117,0.2); border-color: var(--mint2); color: var(--mint2); }
+
+    /* ── RESULTS ── */
+    .results-wrap { max-width: 620px; margin: 0 auto; padding: 28px 20px; }
+    .results-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(15,110,86,0.1); }
+    .results-count { font-size: 13px; color: var(--muted); }
+    .results-count strong { color: var(--teal); font-size: 17px; }
+
+    /* ── TRIAL CARD ── */
+    .trial-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; border: 1px solid rgba(15,110,86,0.08); animation: slideUp 0.4s ease forwards; opacity: 0; transition: transform 0.2s, box-shadow 0.2s; }
+    .trial-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(15,110,86,0.14); }
+    .trial-card.featured { border: 2px solid var(--teal3); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .card-header { padding: 10px 16px; background: var(--mint); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .card-header.featured-header { background: linear-gradient(90deg, #d0f0e4, #e8f8f2); }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+    .badge-phase { background: var(--teal2); color: var(--white); }
+    .badge-new { background: #d4edda; color: #1a5c2a; }
+    .badge-featured { background: var(--teal3); color: var(--white); }
+    .badge-canada { background: #fff0f0; color: #c0392b; }
+    .posted-date { font-size: 11px; color: var(--teal); margin-left: auto; }
+    .card-body { padding: 16px 18px; }
+    .card-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--teal2); margin-bottom: 8px; line-height: 1.35; }
+    .card-summary { font-size: 13px; color: #444; line-height: 1.65; margin-bottom: 10px; }
+    .card-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .card-contact { font-size: 12px; color: var(--teal); margin-bottom: 12px; }
+    .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-primary { padding: 10px; background: var(--teal); color: var(--white); border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; text-align: center; text-decoration: none; display: block; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--teal2); }
+    .btn-secondary { padding: 10px; background: var(--white); color: var(--teal); border: 1.5px solid var(--teal); border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; text-align: center; text-decoration: none; display: block; transition: background 0.2s; }
+    .btn-secondary:hover { background: var(--mint); }
+
+    /* ── LOADER ── */
+    .loader { text-align: center; padding: 48px 0; }
+    .loader-text { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+    .loader-dots { display: flex; justify-content: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal3); animation: pulse 1s ease-in-out infinite alternate; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { from { opacity: 0.3; transform: scale(0.8); } to { opacity: 1; transform: scale(1.1); } }
+
+    /* ── LOAD MORE ── */
+    .load-more-wrap { text-align: center; margin: 8px 0 24px; }
+    .load-more-btn { padding: 13px 36px; background: var(--white); color: var(--teal); border: 2px solid var(--teal); border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .load-more-btn:hover { background: var(--teal); color: var(--white); }
+
+    /* ── ALERT SECTION ── */
+    .alert-section { background: linear-gradient(135deg, var(--teal2) 0%, #042e22 100%); padding: 52px 28px; text-align: center; border-top: 3px solid var(--teal3); }
+    .alert-title { font-family: 'DM Serif Display', serif; color: var(--mint2); font-size: 28px; font-weight: 400; margin-bottom: 10px; }
+    .alert-sub { color: rgba(255,255,255,0.55); font-size: 14px; margin-bottom: 28px; line-height: 1.7; max-width: 380px; margin-left: auto; margin-right: auto; }
+    .alert-form { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: 0 auto; }
+    .alert-input { padding: 14px 18px; border-radius: 10px; border: none; background: var(--white); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+    .alert-input:focus { box-shadow: 0 0 0 3px rgba(29,158,117,0.3); }
+    .alert-btn { padding: 16px; background: var(--teal3); color: var(--white); font-weight: 700; font-size: 15px; border: none; border-radius: 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: transform 0.15s; letter-spacing: 0.3px; }
+    .alert-btn:hover { transform: translateY(-1px); }
+    .alert-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+    .alert-success { color: var(--mint2); font-size: 16px; font-weight: 600; }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer { background: #fffbf0; border-left: 3px solid #f0b429; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 12px; color: #856404; max-width: 620px; margin: 0 auto 24px; }
+
+    /* ── MODAL ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: var(--white); border-radius: 16px; padding: 28px 24px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--teal2); margin-bottom: 4px; }
+    .modal-trial { font-size: 12px; color: var(--muted); margin-bottom: 18px; font-style: italic; line-height: 1.5; }
+    .modal-input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 10px; transition: border-color 0.2s; }
+    .modal-input:focus { border-color: var(--teal); }
+    .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .modal-submit { padding: 12px; background: var(--teal); color: var(--white); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .modal-cancel { padding: 12px; background: var(--white); color: var(--teal); border: 1.5px solid var(--teal); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .modal-success { text-align: center; color: var(--teal); font-size: 15px; font-weight: 600; padding: 10px 0; }
+
+    /* ── FOOTER ── */
+    .footer { background: #021a13; color: rgba(255,255,255,0.3); text-align: center; padding: 28px 20px; font-size: 11px; line-height: 2; }
+    .footer-brand { color: rgba(255,255,255,0.7); font-family: 'DM Serif Display', serif; font-size: 16px; margin-bottom: 4px; }
+    .no-results { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; }
+    .error-msg { text-align: center; padding: 20px; color: #c00; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  const SIGNUP_URL = 'https://script.google.com/macros/s/AKfycbyoKLoIToB1p7BRVB9Fx98T9NVmJk-fSFP9abSM2EAb4ytoODVXwWs5-gJGqGpBdCLuQw/exec';
+
+  const CONDITIONS = {
+    fr: ['Cancer', 'Diabète', 'Parkinson', 'Alzheimer', 'Neuropathie', 'Sclérose en plaques', 'Insuffisance cardiaque'],
+    en: ['Cancer', 'Diabetes', 'Parkinson', 'Alzheimer', 'Neuropathy', 'Multiple sclerosis', 'Heart failure']
+  };
+
+  const copy = {
+    fr: {
+      tagline: 'ESSAIS CLINIQUES EN RECRUTEMENT',
+      badge: '🧬 Alertes du matin disponibles',
+      heroTitle: ['Trouvez un essai clinique', 'près de chez vous'],
+      heroSub: 'Des milliers d\'essais en recrutement actif partout au Canada — filtrés par votre condition et votre ville.',
+      placeholder: 'Votre condition (ex: cancer, diabète, Parkinson...)',
+      cityLabel: 'Ville', radiusLabel: 'Rayon', phaseLabel: 'Phase',
+      allPhases: 'Toutes les phases',
+      searchBtn: 'Rechercher', loading: 'Recherche en cours...',
+      results: 'essais trouvés', noResults: 'Aucun résultat. Essayez une autre condition ou élargissez le rayon.',
+      loadMore: 'Charger plus',
+      newBadge: 'Nouveau', canadaBadge: 'Canada', featuredBadge: '⭐ Mis en avant',
+      viewBtn: 'Voir l\'essai', contactBtn: 'Je suis intéressé(e)',
+      postedLabel: 'Publié le',
+      facilityLabel: 'Site', ageLabel: 'Âge', sponsorLabel: 'Promoteur',
+      alertTitle: 'Bulletin du matin',
+      alertSub: 'Recevez chaque semaine les nouveaux essais correspondant à votre condition — directement dans votre boîte courriel.',
+      alertEmailPlaceholder: 'Votre adresse courriel',
+      alertCondPlaceholder: 'Votre condition (ex: cancer du sein)',
+      alertCityPlaceholder: 'Votre ville (ex: Montréal)',
+      alertBtn: 'S\'abonner', alertSaving: 'Activation...',
+      alertSuccess: '✅ Abonnement activé ! Vous recevrez les nouveaux essais chaque semaine.',
+      disclaimer: '⚠️ TrialGuardian est un outil d\'information uniquement. Consultez votre médecin avant de participer à un essai clinique.',
+      modalTitle: 'Exprimer mon intérêt',
+      modalNamePlaceholder: 'Votre nom *',
+      modalEmailPlaceholder: 'Votre courriel *',
+      modalPhonePlaceholder: 'Votre téléphone',
+      modalNote: 'L\'équipe de recherche vous contactera pour évaluer votre admissibilité.',
+      modalCancel: 'Annuler', modalSend: 'Envoyer',
+      modalSuccess: '✅ Votre demande a été transmise à l\'équipe de recherche.',
+      lang: 'EN'
+    },
+    en: {
+      tagline: 'ACTIVELY RECRUITING CLINICAL TRIALS',
+      badge: '🧬 Morning alerts available',
+      heroTitle: ['Find a clinical trial', 'near you'],
+      heroSub: 'Thousands of actively recruiting trials across Canada — filtered by your condition and city.',
+      placeholder: 'Your condition (e.g. cancer, diabetes, Parkinson\'s...)',
+      cityLabel: 'City', radiusLabel: 'Radius', phaseLabel: 'Phase',
+      allPhases: 'All phases',
+      searchBtn: 'Search', loading: 'Searching...',
+      results: 'trials found', noResults: 'No results. Try a different condition or expand the radius.',
+      loadMore: 'Load more',
+      newBadge: 'New', canadaBadge: 'Canada', featuredBadge: '⭐ Featured',
+      viewBtn: 'View trial', contactBtn: 'I\'m interested',
+      postedLabel: 'Posted',
+      facilityLabel: 'Site', ageLabel: 'Age', sponsorLabel: 'Sponsor',
+      alertTitle: 'Morning Bulletin',
+      alertSub: 'Receive new matching trials every week — delivered directly to your inbox.',
+      alertEmailPlaceholder: 'Your email address',
+      alertCondPlaceholder: 'Your condition (e.g. breast cancer)',
+      alertCityPlaceholder: 'Your city (e.g. Montreal)',
+      alertBtn: 'Subscribe', alertSaving: 'Saving...',
+      alertSuccess: '✅ Subscribed! You\'ll receive new trials every week.',
+      disclaimer: '⚠️ TrialGuardian is an information tool only. Consult your physician before participating in a clinical trial.',
+      modalTitle: 'Express interest',
+      modalNamePlaceholder: 'Your name *',
+      modalEmailPlaceholder: 'Your email *',
+      modalPhonePlaceholder: 'Your phone',
+      modalNote: 'The research team will contact you to assess your eligibility.',
+      modalCancel: 'Cancel', modalSend: 'Send',
+      modalSuccess: '✅ Your inquiry has been forwarded to the research team.',
+      lang: 'FR'
+    }
+  };
+
+  const CITY_COORDS = {
+    'montreal':  { lat: '45.5017', lng: '-73.5673' },
+    'montréal':  { lat: '45.5017', lng: '-73.5673' },
+    'quebec':    { lat: '46.8139', lng: '-71.2080' },
+    'québec':    { lat: '46.8139', lng: '-71.2080' },
+    'toronto':   { lat: '43.6532', lng: '-79.3832' },
+    'vancouver': { lat: '49.2827', lng: '-123.1207' },
+    'calgary':   { lat: '51.0447', lng: '-114.0719' },
+    'ottawa':    { lat: '45.4215', lng: '-75.6972' }
+  };
+
+  function isNewThisWeek(dateStr) {
+    if (!dateStr) return false;
+    const posted = new Date(dateStr);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return posted >= weekAgo;
+  }
+
+  function TrialCard({ trial, index, T, onContact }) {
+    const isNew = isNewThisWeek(trial.firstPostedDate);
+    const hasCanada = trial.country === 'Canada';
+    return (
+      <div className="trial-card" style={{ animationDelay: Math.min(index, 10) * 0.07 + 's' }}>
+        <div className={`card-header`}>
+          {trial.phase && trial.phase !== 'N/A' &&
+            <span className="badge badge-phase">{trial.phase}</span>}
+          {isNew && <span className="badge badge-new">🆕 {T.newBadge}</span>}
+          {hasCanada && <span className="badge badge-canada">🍁 {T.canadaBadge}</span>}
+          {trial.firstPostedDate &&
+            <span className="posted-date">{T.postedLabel} {trial.firstPostedDate}</span>}
+        </div>
+        <div className="card-body">
+          <div className="card-title">{trial.title}</div>
+          {trial.summary && (
+            <div className="card-summary">
+              {trial.summary.length > 280 ? trial.summary.substring(0, 280) + '…' : trial.summary}
+            </div>
+          )}
+          <div className="card-meta">
+            {trial.facility && <span>📍 {trial.facility}{trial.city ? ', ' + trial.city : ''}</span>}
+            {trial.sponsor && <span>🏢 {trial.sponsor}</span>}
+            {(trial.eligibility?.minAge || trial.eligibility?.maxAge) && (
+              <span>👤 {trial.eligibility.minAge || '?'} – {trial.eligibility.maxAge || '?'}</span>
+            )}
+            {trial.enrollment && <span>👥 {trial.enrollment} participants</span>}
+          </div>
+          {trial.contact?.phone && (
+            <div className="card-contact">📞 {trial.contact.phone}</div>
+          )}
+          {trial.contact?.email && (
+            <div className="card-contact">✉️ {trial.contact.email}</div>
+          )}
+          <div className="card-actions">
+            <a href={trial.url} target="_blank" rel="noopener noreferrer" className="btn-primary">
+              {T.viewBtn} →
+            </a>
+            <button className="btn-secondary" onClick={() => onContact(trial)}>
+              {T.contactBtn}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function App() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isUnsubscribed = urlParams.get('unsubscribed') === 'true';
+    const unsubEmail = urlParams.get('email') || '';
+
+    const [lang, setLang] = useState(urlParams.get('lang') || 'fr');
+    const T = copy[lang];
+
+    const [condition, setCondition] = useState('');
+    const [city, setCity] = useState('Montreal');
+    const [radius, setRadius] = useState('100');
+    const [phase, setPhase] = useState('');
+
+    const [trials, setTrials] = useState([]);
+    const [total, setTotal] = useState(null);
+    const [nextToken, setNextToken] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [error, setError] = useState('');
+    const [searched, setSearched] = useState(false);
+
+    const [alertEmail, setAlertEmail] = useState('');
+    const [alertCond, setAlertCond] = useState('');
+    const [alertCity, setAlertCity] = useState('');
+    const [alertState, setAlertState] = useState('idle');
+
+    const [contactTrial, setContactTrial] = useState(null);
+    const [contactName, setContactName] = useState('');
+    const [contactEmail, setContactEmail] = useState('');
+    const [contactPhone, setContactPhone] = useState('');
+    const [contactSent, setContactSent] = useState(false);
+    const [contactSending, setContactSending] = useState(false);
+
+    const getCoords = () => {
+      const key = city.toLowerCase().trim();
+      return CITY_COORDS[key] || CITY_COORDS['montreal'];
+    };
+
+    const buildUrl = (token) => {
+      const coords = getCoords();
+      let url = `/api/search-trials?condition=${encodeURIComponent(condition)}&latitude=${coords.lat}&longitude=${coords.lng}&radius=${radius}&rows=20`;
+      if (phase) url += `&phase=${encodeURIComponent(phase)}`;
+      if (token) url += `&page_token=${token}`;
+      return url;
+    };
+
+    const handleSearch = async () => {
+      if (!condition.trim()) return;
+      setLoading(true); setError(''); setSearched(true); setTrials([]); setNextToken(null);
+      try {
+        const res = await fetch(buildUrl(null));
+        const data = await res.json();
+        setTrials(data.studies || []);
+        setTotal(data.total || 0);
+        setNextToken(data.nextPageToken || null);
+      } catch(e) { setError('Connection error. Please try again.'); }
+      setLoading(false);
+    };
+
+    const handleLoadMore = async () => {
+      if (!nextToken) return;
+      setLoadingMore(true);
+      try {
+        const res = await fetch(buildUrl(nextToken));
+        const data = await res.json();
+        setTrials(prev => [...prev, ...(data.studies || [])]);
+        setNextToken(data.nextPageToken || null);
+      } catch(e) {}
+      setLoadingMore(false);
+    };
+
+    const handlePillClick = (cond) => {
+      setCondition(cond);
+    };
+
+    const handleSignup = async () => {
+      if (!alertEmail || !alertEmail.includes('@')) return;
+      setAlertState('saving');
+      try {
+        const params = new URLSearchParams({
+          email: alertEmail,
+          lang,
+          condition: alertCond || condition || '',
+          city: alertCity || city || 'Montreal',
+          radius,
+          phase: phase || ''
+        });
+        await fetch(SIGNUP_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
+        setAlertState('success');
+      } catch(e) { setAlertState('error'); }
+    };
+
+    const handleContactSubmit = async () => {
+      if (!contactName || !contactEmail) return;
+      setContactSending(true);
+      try {
+        const params = new URLSearchParams({
+          type: 'lead',
+          name: contactName,
+          email: contactEmail,
+          phone: contactPhone || '',
+          condition: contactTrial?.conditions || condition || '',
+          trial: contactTrial?.title || '',
+          nctId: contactTrial?.nctId || '',
+          facility: contactTrial?.facility || '',
+          city: contactTrial?.city || ''
+        });
+        await fetch(SIGNUP_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
+      } catch(e) {}
+      setContactSent(true);
+      setContactSending(false);
+    };
+
+    return (
+      <div>
+        {/* Unsubscribe confirmation */}
+        {isUnsubscribed && (
+          <div style={{position:'fixed',inset:0,background:'#f4f9f7',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}>
+            <div style={{background:'#fff',borderRadius:20,padding:'48px 32px',maxWidth:480,width:'100%',boxShadow:'0 8px 40px rgba(15,110,86,0.12)',textAlign:'center'}}>
+              <div style={{fontSize:56,marginBottom:16}}>✅</div>
+              <div style={{fontFamily:'DM Serif Display,serif',fontSize:24,color:'var(--teal2)',marginBottom:12}}>
+                {lang === 'fr' ? 'Désabonnement confirmé' : 'Unsubscribe confirmed'}
+              </div>
+              <div style={{fontSize:14,color:'var(--muted)',lineHeight:1.7,marginBottom:24}}>
+                {lang === 'fr'
+                  ? <span><strong>{unsubEmail}</strong> ne recevra plus d'alertes TrialGuardian.</span>
+                  : <span><strong>{unsubEmail}</strong> will no longer receive TrialGuardian alerts.</span>}
+              </div>
+              <a href="/" style={{display:'inline-block',background:'var(--teal)',color:'#fff',padding:'12px 24px',borderRadius:10,textDecoration:'none',fontSize:14,fontWeight:600}}>
+                {lang === 'fr' ? 'Retour au site' : 'Back to site'}
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Header */}
+        <header className="header">
+          <div className="top-bar">
+            <span className="top-bar-text">🧬 {T.tagline}</span>
+            <button className="lang-btn" onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}>{T.lang}</button>
+          </div>
+          <div className="header-main">
+            <div className="logo-mark">🧬</div>
+            <div>
+              <div className="brand-name">TrialGuardian</div>
+              <div className="brand-tag">{T.tagline}</div>
+            </div>
+          </div>
+        </header>
+
+        {/* Hero */}
+        <section className="hero">
+          <div className="hero-badge">{T.badge}</div>
+          <h1 className="hero-title">
+            {T.heroTitle[0]}<br/>
+            <em>{T.heroTitle[1]}</em>
+          </h1>
+          <p className="hero-sub">{T.heroSub}</p>
+
+          <div className="search-card">
+            <div className="search-input-wrap">
+              <span className="search-icon">🔬</span>
+              <input
+                className="search-input"
+                placeholder={T.placeholder}
+                value={condition}
+                onChange={e => setCondition(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <div className="filters-row">
+              <div>
+                <label className="filter-label">{T.cityLabel}</label>
+                <select className="filter-select" value={city} onChange={e => setCity(e.target.value)}>
+                  <option value="Montreal">Montréal</option>
+                  <option value="Quebec">Québec</option>
+                  <option value="Toronto">Toronto</option>
+                  <option value="Vancouver">Vancouver</option>
+                  <option value="Calgary">Calgary</option>
+                  <option value="Ottawa">Ottawa</option>
+                </select>
+              </div>
+              <div>
+                <label className="filter-label">{T.radiusLabel}</label>
+                <select className="filter-select" value={radius} onChange={e => setRadius(e.target.value)}>
+                  <option value="25">25 km</option>
+                  <option value="50">50 km</option>
+                  <option value="100">100 km</option>
+                  <option value="200">200 km</option>
+                </select>
+              </div>
+              <div>
+                <label className="filter-label">{T.phaseLabel}</label>
+                <select className="filter-select" value={phase} onChange={e => setPhase(e.target.value)}>
+                  <option value="">{T.allPhases}</option>
+                  <option value="PHASE1">Phase 1</option>
+                  <option value="PHASE2">Phase 2</option>
+                  <option value="PHASE3">Phase 3</option>
+                  <option value="PHASE4">Phase 4</option>
+                </select>
+              </div>
+            </div>
+            <button className="search-btn" onClick={handleSearch} disabled={loading || !condition.trim()}>
+              {loading ? '...' : '🔍 ' + T.searchBtn}
+            </button>
+          </div>
+
+          {/* Condition pills */}
+          <div className="conditions-row">
+            {CONDITIONS[lang].map(c => (
+              <button key={c} className="cond-pill" onClick={() => handlePillClick(c)}>{c}</button>
+            ))}
+          </div>
+        </section>
+
+        {/* Results */}
+        <div className="results-wrap">
+          {searched && !loading && (
+            <div className="disclaimer">{T.disclaimer}</div>
+          )}
+          {loading && (
+            <div className="loader">
+              <div className="loader-text">{T.loading}</div>
+              <div className="loader-dots"><div className="dot"/><div className="dot"/><div className="dot"/></div>
+            </div>
+          )}
+          {error && <div className="error-msg">{error}</div>}
+          {!loading && searched && !error && (
+            <>
+              <div className="results-meta">
+                <div className="results-count">
+                  <strong>{(total || 0).toLocaleString()}</strong> {T.results}
+                  {condition && <span style={{color:'var(--teal)',marginLeft:8}}>· {condition}</span>}
+                </div>
+              </div>
+              {trials.length === 0 && <div className="no-results">{T.noResults}</div>}
+              {trials.map((trial, i) => (
+                <TrialCard
+                  key={trial.nctId + i}
+                  trial={trial}
+                  index={i}
+                  T={T}
+                  onContact={(t) => { setContactTrial(t); setContactSent(false); setContactName(''); setContactEmail(''); setContactPhone(''); }}
+                />
+              ))}
+              {nextToken && (
+                <div className="load-more-wrap">
+                  <button className="load-more-btn" onClick={handleLoadMore} disabled={loadingMore}>
+                    {loadingMore ? '...' : '⬇️ ' + T.loadMore}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Contact / Interest Modal */}
+        {contactTrial && (
+          <div className="modal-overlay" onClick={() => setContactTrial(null)}>
+            <div className="modal-box" onClick={e => e.stopPropagation()}>
+              {!contactSent ? (
+                <>
+                  <div className="modal-title">{T.modalTitle}</div>
+                  <div className="modal-trial">🧬 {contactTrial.title}</div>
+                  <input className="modal-input" placeholder={T.modalNamePlaceholder}
+                    value={contactName} onChange={e => setContactName(e.target.value)} />
+                  <input className="modal-input" placeholder={T.modalEmailPlaceholder}
+                    value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
+                  <input className="modal-input" placeholder={T.modalPhonePlaceholder}
+                    value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
+                  <div style={{fontSize:12,color:'var(--muted)',marginTop:4,lineHeight:1.5}}>{T.modalNote}</div>
+                  <div className="modal-btns">
+                    <button className="modal-cancel" onClick={() => setContactTrial(null)}>{T.modalCancel}</button>
+                    <button className="modal-submit" onClick={handleContactSubmit} disabled={contactSending}>
+                      {contactSending ? '...' : T.modalSend}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="modal-success">{T.modalSuccess}</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Alert signup */}
+        <section className="alert-section">
+          {alertState === 'success' ? (
+            <div className="alert-success">{T.alertSuccess}</div>
+          ) : (
+            <>
+              <div className="alert-title">☀️ {T.alertTitle}</div>
+              <div className="alert-sub">{T.alertSub}</div>
+              <div className="alert-form">
+                <input className="alert-input" placeholder={T.alertEmailPlaceholder}
+                  value={alertEmail} onChange={e => setAlertEmail(e.target.value)}
+                  disabled={alertState === 'saving'} />
+                <input className="alert-input" placeholder={T.alertCondPlaceholder}
+                  value={alertCond} onChange={e => setAlertCond(e.target.value)}
+                  disabled={alertState === 'saving'} />
+                <input className="alert-input" placeholder={T.alertCityPlaceholder}
+                  value={alertCity} onChange={e => setAlertCity(e.target.value)}
+                  disabled={alertState === 'saving'} />
+                <button className="alert-btn" onClick={handleSignup}
+                  disabled={alertState === 'saving' || !alertEmail}>
+                  {alertState === 'saving' ? T.alertSaving : T.alertBtn}
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-brand">🧬 TrialGuardian</div>
+          <div>trialguardian.ca · footguardian.ai@gmail.com</div>
+          <div style={{marginTop:8,fontSize:10,letterSpacing:1,color:'rgba(255,255,255,0.15)'}}>POWERED BY TRIALGUARDIAN.CA</div>
+        </footer>
+      </div>
+    );
+  }
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
