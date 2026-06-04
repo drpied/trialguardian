@@ -37,7 +37,7 @@ exports.handler = async function(event) {
   url += `&sort=${sort}:desc`;
 
   // Fields we need — keeps response lean
-  url += `&fields=NCTId,BriefTitle,BriefSummary,OverallStatus,Phase,StartDate,FirstPostedDate,`
+  
        + `PrimaryCompletionDate,EnrollmentCount,Condition,Intervention,`
        + `LocationFacility,LocationCity,LocationState,LocationCountry,LocationStatus,`
        + `CentralContactName,CentralContactPhone,CentralContactEMail,`
