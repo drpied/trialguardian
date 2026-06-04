@@ -61,7 +61,7 @@ exports.handler = async function(event) {
     return {
       statusCode: 200,
       headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
-      body: JSON.stringify({ total: data.totalCount || 0, nextPageToken: data.nextPageToken || null, studies })
+      body: JSON.stringify({ total: data.totalCount || studies.length, nextPageToken: data.nextPageToken || null, studies })
     };
 
   } catch (error) {
