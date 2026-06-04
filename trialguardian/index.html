@@ -327,7 +327,7 @@
 
     const buildUrl = (token) => {
       const coords = getCoords();
-      let url = `/api/search-trials?condition=${encodeURIComponent(condition)}&latitude=${coords.lat}&longitude=${coords.lng}&radius=${radius}&rows=20`;
+      let url = `/.netlify/functions/search-trials?condition=${encodeURIComponent(condition)}&latitude=${coords.lat}&longitude=${coords.lng}&radius=${radius}&rows=20`;
       if (phase) url += `&phase=${encodeURIComponent(phase)}`;
       if (token) url += `&page_token=${token}`;
       return url;
