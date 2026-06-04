@@ -220,7 +220,11 @@
       lang: 'FR'
     }
   };
-
+const CONDITION_MAP = {
+  'Diabète': 'diabetes', 'Cancer': 'cancer', 'Parkinson': 'parkinson',
+  'Alzheimer': 'alzheimer', 'Neuropathie': 'neuropathy',
+  'Sclérose en plaques': 'multiple sclerosis', 'Insuffisance cardiaque': 'heart failure'
+};
   const CITY_COORDS = {
     'montreal':  { lat: '45.5017', lng: '-73.5673' },
     'montréal':  { lat: '45.5017', lng: '-73.5673' },
@@ -359,8 +363,8 @@
     };
 
     const handlePillClick = (cond) => {
-      setCondition(cond);
-    };
+  setCondition(CONDITION_MAP[cond] || cond);
+};
 
     const handleSignup = async () => {
       if (!alertEmail || !alertEmail.includes('@')) return;
