@@ -15,7 +15,7 @@ exports.handler = async function(event) {
   let url = `https://clinicaltrials.gov/api/v2/studies?format=json&pageSize=${rows}&filter.overallStatus=RECRUITING&sort=firstPostedDate:desc`;
 
   if (condition) url += `&query.cond=${encodeURIComponent(condition)}`;
-  url += `&filter.geo=distance(${latitude},${longitude},${radiusMiles}mi)`;
+  //url += `&filter.geo=distance(${latitude},${longitude},${radiusMiles}mi)`;
   if (phase) url += `&filter.phase=${encodeURIComponent(phase)}`;
   if (page_token) url += `&pageToken=${page_token}`;
 
