@@ -396,7 +396,8 @@ const CONDITION_MAP = {
           trial: contactTrial?.title || '',
           nctId: contactTrial?.nctId || '',
           facility: contactTrial?.facility || '',
-          city: contactTrial?.city || ''
+          city: contactTrial?.city || '',
+          contactEmail: contactTrial?.contact?.email || '',
         });
         await fetch(SIGNUP_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
       } catch(e) {}
